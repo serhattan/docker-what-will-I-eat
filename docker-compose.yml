@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: dontbreak
+      POSTGRES_DB: dontbreak
+      POSTGRES_PASSWORD: 1111
+    ports:
+      - 1994:5432
+
+  api:
+    container_name: whatwillieattoday
+    build: ../whatwillieattoday/
+    ports:
+      - 6000:9000
+    volumes:
+      - ../whatwillieattoday/:/app
+      - /app/vendor
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://dontbreak@postgres/dontbreak
+  nginx:
+    image: nginx:1.11.10-alpine
+    ports:
+      - 4000:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../whatwillieattoday/:/app
+    depends_on:
+      - api
